@@ -1,7 +1,6 @@
 import { useState } from "react";
-import axios from "axios";
 import styles from "./Auth.module.css";
-import API_BASE_URL from "../../service/core/api.js";
+import  API from "../../service/core/api.js";
 
 function Login({ onShowRegister, onLoginSuccess }) {
   const [formData, setFormData] = useState({
@@ -27,8 +26,7 @@ function Login({ onShowRegister, onLoginSuccess }) {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/login`, formData);
-
+const response = await API.post("/auth/login", formData);
       const user = response.data.user;
       const token = response.data.token || response.data.accessToken;
 

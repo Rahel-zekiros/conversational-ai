@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from "react";
-import axios from "axios";
 import { ImagePlus, Download, LoaderCircle, Upload, X } from "lucide-react";
 import styles from "./Image.module.css";
-import API_BASE_URL from '../../service/core/api.js'
+import API from '../../service/core/api.js'
 
 
 export default function Images() {
@@ -89,10 +88,7 @@ export default function Images() {
         payload.image = await fileToDataUrl(selectedImage);
       }
 
-      const response = await axios.post(
-        `${API_BASE_URL}/images/generate`,
-        payload,
-      );
+     const response = await API.post("/images/generate", payload);
 
       if (response.data.success) {
         setGeneratedImage(response.data.data.image);

@@ -14,16 +14,19 @@ const queryAsync = (sql, params = []) => {
   });
 };
 
-// GET ALL MESSAGES
+// GET USER'S MESSAGES (HISTORY)
 export const getConversations = async (req, res) => {
   try {
+    const userId = req.user?.id;
+
     const sql = `
       SELECT id, content, role, created_at
       FROM messages
+      WHERE user_id = ?
       ORDER BY created_at ASC, id ASC
     `;
 
-    const results = await queryAsync(sql);
+    const results = await queryAsync(sql, [userId]);
 
     const messages = results.map((message) => ({
       id: message.id,
@@ -54,8 +57,16 @@ export const createConversation = async (req, res) => {
     console.log("BODY:", req.body);
 
     const { question } = req.body;
+    const userId = req.user?.id;
 
-    // Validate question
+    // Validate question & user
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        error: "Unauthorized user",
+      });
+    }
+
     if (typeof question !== "string" || !question.trim()) {
       return res.status(400).json({
         success: false,
@@ -70,9 +81,11 @@ export const createConversation = async (req, res) => {
       `
         SELECT role, content
         FROM messages
+        WHERE user_id = ?
         ORDER BY created_at DESC, id DESC
         LIMIT 10
       `,
+      [userId]
     );
 
     // Reverse history to chronological order
@@ -82,10 +95,9 @@ export const createConversation = async (req, res) => {
       .map((item) => `${item.role}: ${item.content}`)
       .join("\n");
 
-    console.log("History loaded:", historyRows.length, "messages");
+    console.log("History loaded for user:", userId, "Messages count:", historyRows.length);
 
     // System instructions
-
     const systemPrompt = `
 You are a helpful, intelligent, and conversational AI assistant
 for a ChatGPT clone.
@@ -173,14 +185,12 @@ ${cleanQuestion}
 
           const status = error.status;
 
-          // Try another model only for temporary errors
           if (status !== 429 && status !== 503 && !(status >= 500)) {
             throw error;
           }
         }
       }
 
-      // If every model fails, return an error
       if (!answer || !answer.trim()) {
         throw lastError || new Error("All Gemini models failed");
       }
@@ -203,25 +213,25 @@ ${cleanQuestion}
       });
     }
 
-    // Save the user message
+    // Save the user message 
     const userResult = await queryAsync(
       `
-        INSERT INTO messages (role, content)
-        VALUES (?, ?)
+        INSERT INTO messages (user_id, role, content)
+        VALUES (?, ?, ?)
       `,
-      ["user", cleanQuestion],
+      [userId, "user", cleanQuestion],
     );
 
-    // Save the assistant response
+    // Save the assistant response 
     const assistantResult = await queryAsync(
       `
-        INSERT INTO messages (role, content)
-        VALUES (?, ?)
+        INSERT INTO messages (user_id, role, content)
+        VALUES (?, ?, ?)
       `,
-      ["assistant", answer],
+      [userId, "assistant", answer],
     );
 
-    console.log("User and assistant messages saved successfully");
+    console.log("User and assistant messages saved successfully for user:", userId);
 
     // Return both messages to the frontend
     return res.status(201).json({

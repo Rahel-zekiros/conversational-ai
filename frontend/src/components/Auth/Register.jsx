@@ -1,8 +1,6 @@
 import { useState } from "react";
-import axios from "axios";
 import styles from "../Auth/Auth.module.css";
-import API_BASE_URL from "../../service/core/api.js";
-
+import API from '../../service/core/api.js'
 function Register({ onShowLogin }) {
   const [formData, setFormData] = useState({
     firstName: "",
@@ -32,7 +30,7 @@ function Register({ onShowLogin }) {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/register`, {
+     const response = await API.post("/auth/register", {
         firstName: formData.firstName.trim(),
         lastName: formData.lastName.trim(),
         email: formData.email.trim(),
@@ -53,7 +51,7 @@ function Register({ onShowLogin }) {
         password: "",
       });
 
-      // Success message ከታየ በኋላ Login page ክፈት።
+      // Success message 
       window.setTimeout(() => {
         onShowLogin();
       }, 1500);

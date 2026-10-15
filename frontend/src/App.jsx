@@ -1,18 +1,16 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import axios from "axios";
 import { Menu } from "lucide-react";
-import  API_BASE_URL from "./service/core/api.js"
+import API from "./service/core/api.js";
 import Sidebar from "./components/Sidebar/Sidebar.jsx";
 import ChatHeader from "./components/ChatHeader/ChatHeader.jsx";
 import MessageList from "./components/MessageList/MessageList.jsx";
 import ChatInput from "./components/ChatInput/ChatInput.jsx";
 import Images from "./components/Images/Images.jsx";
-import AppsPage from "./components/Apps/AppsPage.jsx"; 
+import AppsPage from "./components/Apps/AppsPage.jsx";
 import Login from "./components/Auth/Login.jsx";
 import Register from "./components/Auth/Register.jsx";
 
 import "./App.css";
-
 
 function getSavedUser() {
   try {
@@ -38,17 +36,12 @@ function App() {
 
   const fetchConversations = useCallback(async () => {
     try {
-      const response = await axios.get(
-        `${API_BASE_URL}/chat/conversations`
-      );
-
+      const response = await API.get("/chat/conversations");
       if (response.data.success) {
         const data = response.data.data;
 
         setConversations(
-          Array.isArray(data)
-            ? data
-            : data?.conversations || []
+          Array.isArray(data) ? data : data?.conversations || [],
         );
       }
     } catch (error) {
@@ -134,36 +127,27 @@ function App() {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(
-        `${API_BASE_URL}/chat/conversations`,
-        { question: question.trim() }
-      );
-
+      const response = await API.post("/chat/conversations", {
+        question: question.trim(),
+      });
       if (response.data.success) {
-        const {
-          userConversation,
-          assistantConversation,
-        } = response.data.data;
+        const { userConversation, assistantConversation } = response.data.data;
 
         setConversations((prev) => [
-          ...prev.filter(
-            (message) => message.id !== tempUserMessage.id
-          ),
+          ...prev.filter((message) => message.id !== tempUserMessage.id),
           userConversation,
           assistantConversation,
         ]);
       } else {
         throw new Error(
-          response.data.message || "Could not generate a response."
+          response.data.message || "Could not generate a response.",
         );
       }
     } catch (error) {
       console.error("Error posting conversation:", error);
 
       setConversations((prev) => [
-        ...prev.filter(
-          (message) => message.id !== tempUserMessage.id
-        ),
+        ...prev.filter((message) => message.id !== tempUserMessage.id),
         {
           id: Date.now() + 1,
           role: "assistant",
@@ -182,7 +166,7 @@ function App() {
   const filteredConversations = conversations.filter((message) =>
     String(message.content || "")
       .toLowerCase()
-      .includes(searchText.toLowerCase())
+      .includes(searchText.toLowerCase()),
   );
 
   const handleShowChat = () => {
@@ -272,9 +256,7 @@ function App() {
 
             <MessageList
               conversations={
-                activePanel === "search"
-                  ? filteredConversations
-                  : conversations
+                activePanel === "search" ? filteredConversations : conversations
               }
               isLoading={isLoading}
               messagesEndRef={messagesEndRef}
@@ -300,19 +282,14 @@ function App() {
           <AppsPage onBackToChat={() => setActivePanel("chat")} />
         ) : (
           <section className="feature-panel">
-            <h2>
-              {panelDescriptions[activePanel]?.title || "Feature"}
-            </h2>
+            <h2>{panelDescriptions[activePanel]?.title || "Feature"}</h2>
 
             <p>
               {panelDescriptions[activePanel]?.description ||
                 "This feature is not configured yet."}
             </p>
 
-            <button
-              type="button"
-              onClick={() => setActivePanel("chat")}
-            >
+            <button type="button" onClick={() => setActivePanel("chat")}>
               Back to chat
             </button>
           </section>
