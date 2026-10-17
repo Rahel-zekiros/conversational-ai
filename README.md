@@ -109,11 +109,14 @@ ChatgptCloen/
 │   ├── Config/
 │   ├── Controllers/
 │   ├── Routes/
-│   └── package.json
+│   ├── user-registration/
+│   ├── package.json
+│   └── ...
 ├── frontend/
 │   ├── src/
 │   ├── public/
-│   └── package.json
+│   ├── package.json
+│   └── ...
 ├── .gitignore
 └── README.md
 ```
