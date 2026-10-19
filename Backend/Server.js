@@ -7,8 +7,10 @@ import authRoutes from "./user-registration/routes/authRoutes.js";
 
 const app = express();
 app.use(cors());
-// Middleware
-app.use(express.json());
+
+// Middleware 
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Routes
 app.use("/api/chat", chatRoutes);
@@ -16,6 +18,7 @@ app.use("/api/chat", chatRoutes);
 app.use("/api/images", imageRoutes);
 // auth route
 app.use("/api/auth", authRoutes);
+
 // Server
 app.listen(3000, () => {
   console.log("Server is running on port 3000");
