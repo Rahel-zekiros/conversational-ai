@@ -37,13 +37,13 @@ export const generateImage = async (req, res) => {
       const mimeType = match[1];
       const imageBuffer = Buffer.from(match[2], "base64");
 
-      if (
+     if (
         imageBuffer.length === 0 ||
-        imageBuffer.length > 10 * 1024 * 1024
+        imageBuffer.length > 50 * 1024 * 1024
       ) {
         return res.status(400).json({
           success: false,
-          error: "Image must be smaller than 10 MB.",
+          error: "Image must be smaller than 50 MB.",
         });
       }
 
